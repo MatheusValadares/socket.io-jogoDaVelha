@@ -7,6 +7,16 @@ app.use('/', express.static(path.join(__dirname, 'public')));
 
 const server = app.listen('3000', () => { console.log("running") });
 
+const io = socketIo(server);
+
+io.on('connection', (socket) => {
+
+  console.log("new connection")
+
+})
+
+
+
 const sala = {
   board: ['', '', '', '', '', '', '', '', '',],
   playerTime: 0,
@@ -24,5 +34,53 @@ const sala = {
   ]
 }
 
-const io = socketIo(server);
+function handleMove(position) {
+
+  if (sala.gameOver) {
+    return;
+  }
+
+  if (sala.board[position] == '') {
+    sala.board[position] = sala.symbols[sala.playerTime];
+
+    sala.gameOver = isWin();
+
+    if (sala.gameOver == false) {
+
+      sala.playerTime = (sala.playerTime == 0) ? 1 : 0;
+
+      // if (playerTime == 0) {
+      //    playerTime = 1;
+      // } else {
+      //      playerTime = 0;
+    }
+
+  }
+
+
+  return sala.gameOver;
+
+}
+
+function isWin() {
+
+  for (let i = 0; i < sala.winStates.length; i++) {
+    let seq = sala.winStates[i];
+
+    let post1 = seq[0];
+    let post2 = seq[1];
+    let post3 = seq[2];
+
+    if (sala.board[post1] == sala.board[post2] && sala.board[post1] == sala.board[post3]
+      && sala.board[post1] != '') {
+      return true;
+    }
+
+
+  }
+
+  return false;
+
+}
+
 
