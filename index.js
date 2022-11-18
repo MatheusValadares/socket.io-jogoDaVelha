@@ -11,11 +11,17 @@ const io = socketIo(server);
 
 io.on('connection', (socket) => {
 
-  console.log("new connection")
+  console.log("new connection");
+  io.emit('update_board', sala.board);
+
+  socket.on('handle_move', (data) => {
+
+    handleMove(data);
+    io.emit('update_board', sala.board);
+
+  });
 
 })
-
-
 
 const sala = {
   board: ['', '', '', '', '', '', '', '', '',],
@@ -31,7 +37,9 @@ const sala = {
     [2, 5, 8],
     [0, 4, 8],
     [2, 4, 6],
-  ]
+  ],
+  player0: 0,
+  player1: 1
 }
 
 function handleMove(position) {
@@ -49,16 +57,10 @@ function handleMove(position) {
 
       sala.playerTime = (sala.playerTime == 0) ? 1 : 0;
 
-      // if (playerTime == 0) {
-      //    playerTime = 1;
-      // } else {
-      //      playerTime = 0;
     }
 
   }
 
-
-  return sala.gameOver;
 
 }
 
@@ -73,10 +75,11 @@ function isWin() {
 
     if (sala.board[post1] == sala.board[post2] && sala.board[post1] == sala.board[post3]
       && sala.board[post1] != '') {
+
+      io.emit('winner', sala.playerTime);
       return true;
+
     }
-
-
   }
 
   return false;
