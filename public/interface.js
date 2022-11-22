@@ -1,6 +1,12 @@
 const socket = io('http://localhost:3000');
 
 let board = null;
+let id = null;
+
+socket.on('create_id', (data) => {
+  id = data;
+  console.log(id)
+});
 
 socket.on('update_board', (data) => {
   board = data;
@@ -18,7 +24,7 @@ function handleClick(event) {
   let square = event.target;
   let position = square.id;
 
-  socket.emit('handle_move', position);
+  socket.emit('handle_move', { position: position, id: id });
 
 }
 

@@ -12,11 +12,22 @@ const io = socketIo(server);
 io.on('connection', (socket) => {
 
   console.log("new connection");
+
+  if (sala.player0 == undefined) {
+    sala.player0 = 0
+    socket.emit('create_id', 0);
+  } else if (sala.player1 == undefined) {
+    sala.player1 = 1;
+    socket.emit('create_id', 1);
+  } else {
+    return
+  }
+
   io.emit('update_board', sala.board);
 
   socket.on('handle_move', (data) => {
 
-    handleMove(data);
+    handleMove(data.position, data.id);
     io.emit('update_board', sala.board);
 
   });
@@ -38,14 +49,19 @@ const sala = {
     [0, 4, 8],
     [2, 4, 6],
   ],
-  player0: 0,
-  player1: 1
+  player0: undefined,
+  player1: undefined
 }
 
-function handleMove(position) {
+function handleMove(position, id) {
 
   if (sala.gameOver) {
     return;
+  }
+
+  if (id != sala.playerTime) {
+    console.log("não é sua vez");
+    return
   }
 
   if (sala.board[position] == '') {
