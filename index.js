@@ -11,26 +11,28 @@ const io = socketIo(server);
 
 io.on('connection', (socket) => {
 
-  console.log("new connection");
+  console.log("new connection")
 
-  if (sala.player0 == undefined) {
-    sala.player0 = 0
-    socket.emit('create_id', 0);
-  } else if (sala.player1 == undefined) {
-    sala.player1 = 1;
-    socket.emit('create_id', 1);
-  } else {
-    return
-  }
+  // console.log("new connection");
 
-  io.emit('update_board', sala.board);
+  // if (sala.player0 == undefined) {
+  //   sala.player0 = 0
+  //   socket.emit('create_id', 0);
+  // } else if (sala.player1 == undefined) {
+  //   sala.player1 = 1;
+  //   socket.emit('create_id', 1);
+  // } else {
+  //   return
+  // }
 
-  socket.on('handle_move', (data) => {
+  // io.emit('update_board', sala.board);
 
-    handleMove(data.position, data.id);
-    io.emit('update_board', sala.board);
+  // socket.on('handle_move', (data) => {
 
-  });
+  //   handleMove(data.position, data.id);
+  //   io.emit('update_board', sala.board);
+
+  // });
 
 })
 
