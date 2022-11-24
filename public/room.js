@@ -1,8 +1,15 @@
 const socket = io('http://localhost:3000');
 const room = window.location.pathname.replace('/\/g', '');
 
-let board = null;
-let id = null;
+let idRoom = undefined;
+
+socket.emit('createRoom');
+
+socket.on('idRoom', (id) => {
+  idRoom = id;
+  console.log(idRoom);
+});
+
 
 socket.on('create_id', (data) => {
   id = data;
@@ -11,6 +18,7 @@ socket.on('create_id', (data) => {
 
 socket.on('update_board', (data) => {
   board = data;
+  console.log(board);
   updateSquares();
 });
 
@@ -25,7 +33,7 @@ function handleClick(event) {
   let square = event.target;
   let position = square.id;
 
-  socket.emit('handle_move', { position: position, id: id });
+  socket.emit('handle_move', { position: position, idRoom: idRoom, id: 0 });
 
 }
 

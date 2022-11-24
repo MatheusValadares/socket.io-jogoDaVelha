@@ -4,7 +4,7 @@ const path = require('path');
 const socketIo = require('socket.io');
 
 app.use('/', express.static(path.join(__dirname, 'public')));
-app.get('/:room', express.urlencoded(), (req, res) => { res.sendFile(path.join(__dirname + '/public/room.html')) });
+app.get('/room', express.urlencoded({ extended: false }), (req, res) => { res.sendFile(path.join(__dirname + '/public/room.html')) });
 
 const server = app.listen('3000', () => { console.log("running") });
 
@@ -44,51 +44,26 @@ io.on('connection', (socket) => {
 
     socket.emit('idRoom', idRoom);
 
+    io.to(`${idRoom}`).emit('update_board', rooms[0].board);
+
+    socket.on('handle_move', (data) => {
+
+      let idRoom = data.idRoom;
+      let position = data.position;
+      let id = data.id;
+
+      handleMove(position, id, rooms[0]);
+      io.to(`${idRoom}`).emit('update_board', rooms[0].board);
+
+    });
+
   })
 
-  // console.log("new connection");
-
-  // if (sala.player0 == undefined) {
-  //   sala.player0 = 0
-  //   socket.emit('create_id', 0);
-  // } else if (sala.player1 == undefined) {
-  //   sala.player1 = 1;
-  //   socket.emit('create_id', 1);
-  // } else {
-  //   return
-  // }
-
-  // io.emit('update_board', sala.board);
-
-  // socket.on('handle_move', (data) => {
-
-  //   handleMove(data.position, data.id);
-  //   io.emit('update_board', sala.board);
-
-  // });
 
 })
 
-// const sala = {
-//   board: ['', '', '', '', '', '', '', '', '',],
-//   playerTime: 0,
-//   symbols: ['o', 'x'],
-//   gameOver: false,
-//   winStates: [
-//     [0, 1, 2],
-//     [3, 4, 5],
-//     [6, 7, 8],
-//     [0, 3, 6],
-//     [1, 4, 7],
-//     [2, 5, 8],
-//     [0, 4, 8],
-//     [2, 4, 6],
-//   ],
-//   player0: undefined,
-//   player1: undefined
-// }
 
-function handleMove(position, id) {
+function handleMove(position, id, sala) {
 
   if (sala.gameOver) {
     return;
@@ -102,7 +77,7 @@ function handleMove(position, id) {
   if (sala.board[position] == '') {
     sala.board[position] = sala.symbols[sala.playerTime];
 
-    sala.gameOver = isWin();
+    sala.gameOver = isWin(sala);
 
     if (sala.gameOver == false) {
 
@@ -115,7 +90,7 @@ function handleMove(position, id) {
 
 }
 
-function isWin() {
+function isWin(sala) {
 
   for (let i = 0; i < sala.winStates.length; i++) {
     let seq = sala.winStates[i];
