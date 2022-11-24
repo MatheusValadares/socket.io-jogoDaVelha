@@ -1,24 +1,26 @@
 const socket = io('http://localhost:3000');
-const room = window.location.pathname.replace('/\/g', '');
-
+const room = window.location.pathname.replace(/\//g, '');
 let idRoom = undefined;
-
-socket.emit('createRoom');
-
-socket.on('idRoom', (id) => {
-  idRoom = id;
-  console.log(idRoom);
-});
+let player = undefined;
 
 
-socket.on('create_id', (data) => {
-  id = data;
-  console.log(id)
+if (room === 'room') {
+  socket.emit('createRoom');
+} else {
+  //CRIAR FUNÇÃO PARA VERIFICAR SE SALA EXISTE;
+  idRoom = room;
+  socket.emit('enterRoom', idRoom);
+}
+
+
+socket.on('idRoom', (data) => {
+  idRoom = data.idRoom;
+  player = data.player
+  console.log(idRoom, player);
 });
 
 socket.on('update_board', (data) => {
   board = data;
-  console.log(board);
   updateSquares();
 });
 
@@ -33,7 +35,7 @@ function handleClick(event) {
   let square = event.target;
   let position = square.id;
 
-  socket.emit('handle_move', { position: position, idRoom: idRoom, id: 0 });
+  socket.emit('handle_move', { position: position, idRoom: idRoom, id: player });
 
 }
 

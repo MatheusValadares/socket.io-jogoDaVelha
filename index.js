@@ -5,6 +5,7 @@ const socketIo = require('socket.io');
 
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.get('/room', express.urlencoded({ extended: false }), (req, res) => { res.sendFile(path.join(__dirname + '/public/room.html')) });
+app.get('/:room', express.urlencoded({ extended: false }), (req, res) => { res.sendFile(path.join(__dirname + '/public/room.html')) });
 
 const server = app.listen('3000', () => { console.log("running") });
 
@@ -37,12 +38,12 @@ io.on('connection', (socket) => {
         [0, 4, 8],
         [2, 4, 6],
       ],
-      player0: idRoom,
-      player1: undefined
+      player0: 0,
+      player1: 1
 
     })
 
-    socket.emit('idRoom', idRoom);
+    socket.emit('idRoom', { idRoom, player: rooms[0].player0 });
 
     io.to(`${idRoom}`).emit('update_board', rooms[0].board);
 
@@ -59,8 +60,41 @@ io.on('connection', (socket) => {
 
   })
 
+  //AJUSTAR EVENTOS
+
+  socket.on('enterRoom', (idRoom) => {
+
+    socket.emit('idRoom', { idRoom, player: rooms[0].player1 });
+
+    socket.emit('update_board', rooms[0].board);
+
+    socket.on('handle_move', (data) => {
+
+      let idRoom = data.idRoom;
+      let position = data.position;
+      let id = data.id;
+
+      handleMove(position, id, rooms[0]);
+      io.to(`${idRoom}`).emit('update_board', rooms[0].board);
+
+    });
+
+  });
+
+  socket.on('handle_move', (data) => {
+
+    let idRoom = data.idRoom;
+    let position = data.position;
+    let id = data.id;
+
+    handleMove(position, id, rooms[0]);
+    io.to(`${idRoom}`).emit('update_board', rooms[0].board);
+
+  });
 
 })
+
+
 
 
 function handleMove(position, id, sala) {
