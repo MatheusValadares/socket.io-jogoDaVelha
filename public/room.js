@@ -1,4 +1,5 @@
 const socket = io('http://localhost:3000');
+const room = window.location.pathname.replace('/\/g', '');
 
 let board = null;
 let id = null;

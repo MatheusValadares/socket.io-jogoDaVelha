@@ -4,14 +4,47 @@ const path = require('path');
 const socketIo = require('socket.io');
 
 app.use('/', express.static(path.join(__dirname, 'public')));
+app.get('/:room', express.urlencoded(), (req, res) => { res.sendFile(path.join(__dirname + '/public/room.html')) });
 
 const server = app.listen('3000', () => { console.log("running") });
 
 const io = socketIo(server);
 
+const rooms = []
+
 io.on('connection', (socket) => {
 
   console.log("new connection")
+
+  socket.on('createRoom', () => {
+
+    let idRoom = socket.id;
+    socket.join(idRoom);
+
+    rooms.push({
+      roomName: idRoom,
+      board: ['', '', '', '', '', '', '', '', '',],
+      playerTime: 0,
+      symbols: ['o', 'x'],
+      gameOver: false,
+      winStates: [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ],
+      player0: idRoom,
+      player1: undefined
+
+    })
+
+    socket.emit('idRoom', idRoom);
+
+  })
 
   // console.log("new connection");
 
@@ -36,24 +69,24 @@ io.on('connection', (socket) => {
 
 })
 
-const sala = {
-  board: ['', '', '', '', '', '', '', '', '',],
-  playerTime: 0,
-  symbols: ['o', 'x'],
-  gameOver: false,
-  winStates: [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ],
-  player0: undefined,
-  player1: undefined
-}
+// const sala = {
+//   board: ['', '', '', '', '', '', '', '', '',],
+//   playerTime: 0,
+//   symbols: ['o', 'x'],
+//   gameOver: false,
+//   winStates: [
+//     [0, 1, 2],
+//     [3, 4, 5],
+//     [6, 7, 8],
+//     [0, 3, 6],
+//     [1, 4, 7],
+//     [2, 5, 8],
+//     [0, 4, 8],
+//     [2, 4, 6],
+//   ],
+//   player0: undefined,
+//   player1: undefined
+// }
 
 function handleMove(position, id) {
 
