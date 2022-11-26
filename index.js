@@ -45,39 +45,16 @@ io.on('connection', (socket) => {
 
     socket.emit('idRoom', { idRoom, player: rooms[0].player0 });
 
-    io.to(`${idRoom}`).emit('update_board', rooms[0].board);
-
-    socket.on('handle_move', (data) => {
-
-      let idRoom = data.idRoom;
-      let position = data.position;
-      let id = data.id;
-
-      handleMove(position, id, rooms[0]);
-      io.to(`${idRoom}`).emit('update_board', rooms[0].board);
-
-    });
-
   })
 
-  //AJUSTAR EVENTOS
 
   socket.on('enterRoom', (idRoom) => {
+
+    socket.join(idRoom);
 
     socket.emit('idRoom', { idRoom, player: rooms[0].player1 });
 
     socket.emit('update_board', rooms[0].board);
-
-    socket.on('handle_move', (data) => {
-
-      let idRoom = data.idRoom;
-      let position = data.position;
-      let id = data.id;
-
-      handleMove(position, id, rooms[0]);
-      io.to(`${idRoom}`).emit('update_board', rooms[0].board);
-
-    });
 
   });
 
@@ -90,6 +67,7 @@ io.on('connection', (socket) => {
     handleMove(position, id, rooms[0]);
     io.to(`${idRoom}`).emit('update_board', rooms[0].board);
 
+    console.log(rooms)
   });
 
 })
@@ -104,7 +82,7 @@ function handleMove(position, id, sala) {
   }
 
   if (id != sala.playerTime) {
-    console.log("não é sua vez");
+    console.log("não é sua vez", id, sala.playerTime);
     return
   }
 

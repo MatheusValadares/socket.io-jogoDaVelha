@@ -1,14 +1,14 @@
 const socket = io('http://localhost:3000');
-const room = window.location.pathname.replace(/\//g, '');
+const URLroom = window.location.pathname.replace(/\//g, '');
 let idRoom = undefined;
 let player = undefined;
 
 
-if (room === 'room') {
+if (URLroom === 'room') {
   socket.emit('createRoom');
 } else {
   //CRIAR FUNÇÃO PARA VERIFICAR SE SALA EXISTE;
-  idRoom = room;
+  idRoom = URLroom;
   socket.emit('enterRoom', idRoom);
 }
 
@@ -16,7 +16,7 @@ if (room === 'room') {
 socket.on('idRoom', (data) => {
   idRoom = data.idRoom;
   player = data.player
-  console.log(idRoom, player);
+  console.log(idRoom);
 });
 
 socket.on('update_board', (data) => {
