@@ -39,11 +39,13 @@ io.on('connection', (socket) => {
         [2, 4, 6],
       ],
       player0: 0,
-      player1: 1
+      player1: 1,
+      gameStatus: 'waiting',
 
     })
 
     socket.emit('idRoom', { idRoom, player: rooms[indexRoom(idRoom)].player0 });
+    socket.emit('updateGameStatus', rooms[indexRoom(idRoom)].gameStatus)
 
   })
 
@@ -69,6 +71,10 @@ io.on('connection', (socket) => {
 
     socket.emit('update_board', rooms[indexRoom(idRoom)].board);
 
+    rooms[indexRoom(idRoom)].gameStatus = 0;
+
+    io.to(`${idRoom}`).emit('updateGameStatus', rooms[indexRoom(idRoom)].gameStatus)
+
   });
 
   socket.on('handle_move', (data) => {
@@ -79,6 +85,7 @@ io.on('connection', (socket) => {
 
     handleMove(position, id, rooms[indexRoom(idRoom)]);
     io.to(`${idRoom}`).emit('update_board', rooms[indexRoom(idRoom)].board);
+    io.to(`${idRoom}`).emit('updateGameStatus', rooms[indexRoom(idRoom)].gameStatus)
 
   });
 
@@ -102,6 +109,10 @@ function handleMove(position, id, room) {
     return;
   }
 
+  if (room.gameStatus != 0 && room.gameStatus != 1) {
+    return;
+  }
+
   if (id != room.playerTime) {
     console.log("não é sua vez", id, room.playerTime);
     return
@@ -115,6 +126,7 @@ function handleMove(position, id, room) {
     if (room.gameOver == false) {
 
       room.playerTime = (room.playerTime == 0) ? 1 : 0;
+      room.gameStatus = (room.gameStatus == 0) ? 1 : 0;
 
     }
 
@@ -136,6 +148,8 @@ function isWin(room) {
       && room.board[post1] != '') {
 
       io.to(room.name).emit('winner', room.playerTime);
+      room.gameStatus = 'gameOver';
+
       return true;
 
     }
