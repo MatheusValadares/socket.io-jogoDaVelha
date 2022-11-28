@@ -47,6 +47,17 @@ io.on('connection', (socket) => {
 
   })
 
+  socket.on('checkExistenceRoom', (URLroom) => {
+    let existenceRoom = false;
+    rooms.forEach(room => {
+      if (room.name == URLroom) {
+        existenceRoom = true;
+      }
+    });
+
+    socket.emit('returnExistenceRoom', existenceRoom);
+  })
+
 
   socket.on('enterRoom', (idRoom) => {
 

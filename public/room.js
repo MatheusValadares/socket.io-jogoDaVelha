@@ -7,10 +7,17 @@ let player = undefined;
 if (URLroom === 'room') {
   socket.emit('createRoom');
 } else {
-  //CRIAR FUNÇÃO PARA VERIFICAR SE SALA EXISTE;
-  idRoom = URLroom;
-  socket.emit('enterRoom', idRoom);
+  socket.emit('checkExistenceRoom', URLroom);
 }
+
+socket.on('returnExistenceRoom', (existenceRoom) => {
+  if (existenceRoom) {
+    idRoom = URLroom;
+    socket.emit('enterRoom', idRoom);
+  } else {
+    window.location.href = `http://localhost:3000`;
+  }
+})
 
 
 socket.on('idRoom', (data) => {
