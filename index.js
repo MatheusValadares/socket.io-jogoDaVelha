@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
     socket.join(idRoom);
 
     rooms.push({
-      roomName: idRoom,
+      name: idRoom,
       board: ['', '', '', '', '', '', '', '', '',],
       playerTime: 0,
       symbols: ['o', 'x'],
@@ -43,7 +43,7 @@ io.on('connection', (socket) => {
 
     })
 
-    socket.emit('idRoom', { idRoom, player: rooms[0].player0 });
+    socket.emit('idRoom', { idRoom, player: rooms[indexRoom(idRoom)].player0 });
 
   })
 
@@ -52,9 +52,11 @@ io.on('connection', (socket) => {
 
     socket.join(idRoom);
 
-    socket.emit('idRoom', { idRoom, player: rooms[0].player1 });
+    indexRoom(idRoom);
 
-    socket.emit('update_board', rooms[0].board);
+    socket.emit('idRoom', { idRoom, player: rooms[indexRoom(idRoom)].player1 });
+
+    socket.emit('update_board', rooms[indexRoom(idRoom)].board);
 
   });
 
@@ -64,36 +66,44 @@ io.on('connection', (socket) => {
     let position = data.position;
     let id = data.id;
 
-    handleMove(position, id, rooms[0]);
-    io.to(`${idRoom}`).emit('update_board', rooms[0].board);
+    handleMove(position, id, rooms[indexRoom(idRoom)]);
+    io.to(`${idRoom}`).emit('update_board', rooms[indexRoom(idRoom)].board);
 
-    console.log(rooms)
   });
 
 })
 
+function indexRoom(idRoom) {
+
+  for (i = 0; i < rooms.length; i++) {
+    if (rooms[i].name == idRoom) {
+      return i;
+    }
+  }
+
+}
 
 
 
-function handleMove(position, id, sala) {
+function handleMove(position, id, room) {
 
-  if (sala.gameOver) {
+  if (room.gameOver) {
     return;
   }
 
-  if (id != sala.playerTime) {
-    console.log("não é sua vez", id, sala.playerTime);
+  if (id != room.playerTime) {
+    console.log("não é sua vez", id, room.playerTime);
     return
   }
 
-  if (sala.board[position] == '') {
-    sala.board[position] = sala.symbols[sala.playerTime];
+  if (room.board[position] == '') {
+    room.board[position] = room.symbols[room.playerTime];
 
-    sala.gameOver = isWin(sala);
+    room.gameOver = isWin(room);
 
-    if (sala.gameOver == false) {
+    if (room.gameOver == false) {
 
-      sala.playerTime = (sala.playerTime == 0) ? 1 : 0;
+      room.playerTime = (room.playerTime == 0) ? 1 : 0;
 
     }
 
@@ -102,19 +112,19 @@ function handleMove(position, id, sala) {
 
 }
 
-function isWin(sala) {
+function isWin(room) {
 
-  for (let i = 0; i < sala.winStates.length; i++) {
-    let seq = sala.winStates[i];
+  for (let i = 0; i < room.winStates.length; i++) {
+    let seq = room.winStates[i];
 
     let post1 = seq[0];
     let post2 = seq[1];
     let post3 = seq[2];
 
-    if (sala.board[post1] == sala.board[post2] && sala.board[post1] == sala.board[post3]
-      && sala.board[post1] != '') {
+    if (room.board[post1] == room.board[post2] && room.board[post1] == room.board[post3]
+      && room.board[post1] != '') {
 
-      io.emit('winner', sala.playerTime);
+      io.to(room.name).emit('winner', room.playerTime);
       return true;
 
     }
