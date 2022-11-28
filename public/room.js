@@ -37,10 +37,8 @@ socket.on('update_board', (data) => {
   updateSquares();
 });
 
-socket.on('winner', (data) => {
-  setTimeout(() => {
-    alert("O jogo acabou! O vencedor foi o jogador " + data)
-  }, 60);
+socket.on('winner', (winner) => {
+  gameOverView(winner)
 })
 
 function handleClick(event) {
@@ -102,6 +100,28 @@ function updateGameStatus(gameStatus) {
   }
 
 }
+
+function gameOverView(winnerPlayer) {
+
+  let winner = undefined;
+
+  if (winnerPlayer == 0) {
+    winner = 'jogador 1';
+  } else {
+    winner = 'jogador 2';
+  }
+
+  setTimeout(() => {
+
+    let gameOver = document.getElementById('gameOver');
+    let sms = document.getElementById('msgGameOver');
+    sms.innerHTML = `Fim de jogo!<br>O ${winner} venceu!`
+    gameOver.style.display = 'flex';
+
+  }, 1000);
+
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
