@@ -89,6 +89,13 @@ io.on('connection', (socket) => {
 
   });
 
+  socket.on('restartGame', (idRoom) => {
+    restartGame(rooms[indexRoom(idRoom)]);
+    io.to(`${idRoom}`).emit('update_board', rooms[indexRoom(idRoom)].board);
+    io.to(`${idRoom}`).emit('updateGameStatus', rooms[indexRoom(idRoom)].gameStatus)
+    io.to(idRoom).emit('newGame');
+  })
+
 })
 
 function indexRoom(idRoom) {
@@ -121,7 +128,7 @@ function handleMove(position, id, room) {
   if (room.board[position] == '') {
     room.board[position] = room.symbols[room.playerTime];
 
-    room.gameOver = isWin(room);
+    if (isWin(room) || checkDraw(room)) { room.gameOver = true }
 
     if (room.gameOver == false) {
 
@@ -147,8 +154,10 @@ function isWin(room) {
     if (room.board[post1] == room.board[post2] && room.board[post1] == room.board[post3]
       && room.board[post1] != '') {
 
-      io.to(room.name).emit('winner', room.playerTime);
       room.gameStatus = 'gameOver';
+      io.to(room.name).emit('updateGameStatus', room.gameStatus);
+      io.to(room.name).emit('winner', room.playerTime);
+
 
       return true;
 
@@ -156,6 +165,36 @@ function isWin(room) {
   }
 
   return false;
+
+}
+
+function checkDraw(room) {
+
+  let filledSquares = 0;
+
+  room.board.forEach((square) => {
+    if (square != '') {
+      filledSquares++
+    }
+  })
+
+  if (filledSquares == 9) {
+    room.gameStatus = 'gameOver';
+    io.to(room.name).emit('updateGameStatus', room.gameStatus);
+    io.to(room.name).emit('draw');
+    return true;
+  }
+
+  return false;
+
+}
+
+function restartGame(room) {
+
+  room.board = ['', '', '', '', '', '', '', '', '',];
+  room.playerTime = (room.playerTime == 0) ? 1 : 0;
+  room.gameStatus = room.playerTime;
+  room.gameOver = false;
 
 }
 

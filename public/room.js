@@ -41,6 +41,14 @@ socket.on('winner', (winner) => {
   gameOverView(winner)
 })
 
+socket.on('draw', () => {
+  gameOverView();
+})
+
+socket.on('newGame', () => {
+  removeGameOverView();
+})
+
 function handleClick(event) {
 
   let square = event.target;
@@ -77,7 +85,6 @@ function addElementID(idRoom) {
 
 function updateGameStatus(gameStatus) {
 
-  console.log(gameStatus)
   let status = document.getElementById('gameStatus');
   status.innerHTML = '';
 
@@ -103,6 +110,19 @@ function updateGameStatus(gameStatus) {
 
 function gameOverView(winnerPlayer) {
 
+  if (winnerPlayer == undefined) {
+    setTimeout(() => {
+
+      let gameOver = document.getElementById('gameOver');
+      let sms = document.getElementById('msgGameOver');
+      sms.innerHTML = `Fim de jogo!<br>Ninguém venceu!`
+      gameOver.style.display = 'flex';
+
+    }, 1000);
+
+    return
+  }
+
   let winner = undefined;
 
   if (winnerPlayer == 0) {
@@ -122,6 +142,26 @@ function gameOverView(winnerPlayer) {
 
 }
 
+function restart() {
+
+  socket.emit('restartGame', idRoom);
+
+}
+
+function removeGameOverView() {
+
+  let squares = document.querySelectorAll('.square');
+
+  squares.forEach((square) => {
+    square.innerHTML = '';
+  })
+
+  let gameOver = document.getElementById('gameOver');
+  let sms = document.getElementById('msgGameOver');
+  sms.innerHTML = '';
+  gameOver.style.display = 'none';
+
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 
