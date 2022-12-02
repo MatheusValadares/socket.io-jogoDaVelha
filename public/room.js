@@ -28,6 +28,10 @@ socket.on('idRoom', (data) => {
   updateGameStatus(gameStatus);
 });
 
+socket.on('fullRoom', () => {
+  window.location.href = `http://localhost:3000`;
+})
+
 socket.on('updateGameStatus', (gameStatus) => {
   updateGameStatus(gameStatus);
 })

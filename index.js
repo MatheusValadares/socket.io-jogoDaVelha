@@ -41,6 +41,8 @@ io.on('connection', (socket) => {
       player0: 0,
       player1: 1,
       gameStatus: 'waiting',
+      player0ID: idRoom,
+      player1ID: undefined,
 
     })
 
@@ -63,17 +65,28 @@ io.on('connection', (socket) => {
 
   socket.on('enterRoom', (idRoom) => {
 
-    socket.join(idRoom);
+    let player = checkPlayers(rooms[indexRoom(idRoom)]);
 
-    indexRoom(idRoom);
+    switch (player) {
+      case 0: rooms[indexRoom(idRoom)].player0ID = socket.id;
+        break;
+      case 1: rooms[indexRoom(idRoom)].player1ID = socket.id;
+        break;
+    }
 
-    socket.emit('idRoom', { idRoom, player: rooms[indexRoom(idRoom)].player1 });
+    if (player == 2) {
+      socket.emit('fullRoom');
+    } else {
+      socket.join(idRoom);
 
-    socket.emit('update_board', rooms[indexRoom(idRoom)].board);
+      socket.emit('idRoom', { idRoom, player: player });
 
-    rooms[indexRoom(idRoom)].gameStatus = 0;
+      socket.emit('update_board', rooms[indexRoom(idRoom)].board);
 
-    io.to(`${idRoom}`).emit('updateGameStatus', rooms[indexRoom(idRoom)].gameStatus)
+      rooms[indexRoom(idRoom)].gameStatus = 0;
+
+      io.to(`${idRoom}`).emit('updateGameStatus', rooms[indexRoom(idRoom)].gameStatus);
+    }
 
   });
 
@@ -96,7 +109,24 @@ io.on('connection', (socket) => {
     io.to(idRoom).emit('newGame');
   })
 
+  socket.on("disconnecting", () => {
+
+    console.log(socket.rooms);
+  })
+
 })
+
+function checkPlayers(room) {
+
+  if (room.player0ID != undefined && room.player1ID != undefined) {
+    return 2;
+  } else if (room.player0ID == undefined) {
+    return 0;
+  } else {
+    return 1;
+  }
+
+}
 
 function indexRoom(idRoom) {
 
