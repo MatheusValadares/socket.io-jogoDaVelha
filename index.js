@@ -1,3 +1,4 @@
+const { Socket } = require('dgram');
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -111,7 +112,17 @@ io.on('connection', (socket) => {
 
   socket.on("disconnecting", () => {
 
-    console.log(socket.rooms);
+    let idRoom = undefined;
+
+    if (socket.rooms.size === 1) {
+      idRoom = socket.id;
+      rooms[indexRoom(idRoom)].player0ID = undefined;
+      console.log(socket.rooms);
+    } else {
+      const salas = socket.rooms;
+      console.log(Object.keys(salas))
+    }
+
   })
 
 })
