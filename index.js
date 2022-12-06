@@ -84,7 +84,9 @@ io.on('connection', (socket) => {
 
       socket.emit('update_board', rooms[indexRoom(idRoom)].board);
 
-      rooms[indexRoom(idRoom)].gameStatus = 0;
+      if (rooms[indexRoom(idRoom)].gameStatus == 'waiting') {
+        rooms[indexRoom(idRoom)].gameStatus = 0;
+      }
 
       io.to(`${idRoom}`).emit('updateGameStatus', rooms[indexRoom(idRoom)].gameStatus);
     }
@@ -112,20 +114,43 @@ io.on('connection', (socket) => {
 
   socket.on("disconnecting", () => {
 
-    let idRoom = undefined;
+    let room = playerRoom(socket.id);
+    if (room == undefined) { return }
 
-    if (socket.rooms.size === 1) {
-      idRoom = socket.id;
-      rooms[indexRoom(idRoom)].player0ID = undefined;
-      console.log(socket.rooms);
-    } else {
-      const salas = socket.rooms;
-      console.log(Object.keys(salas))
+    if (room.player0ID == socket.id) {
+      room.player0ID = undefined;
+      deleteRoom(room);
+    } else if (room.player1ID == socket.id) {
+      room.player1ID = undefined;
+      deleteRoom(room);
     }
 
   })
 
 })
+
+function deleteRoom(room) {
+
+  let index = indexRoom(room.name);
+
+  if (room.player0ID == undefined && room.player1ID == undefined) {
+    rooms.splice(index, 1);
+  }
+
+
+}
+
+function playerRoom(playerID) {
+
+  for (i = 0; i < rooms.length; i++) {
+    if (rooms[i].player0ID == playerID || rooms[i].player1ID == playerID) {
+      return rooms[i];
+    }
+  }
+
+}
+
+
 
 function checkPlayers(room) {
 
@@ -162,7 +187,6 @@ function handleMove(position, id, room) {
   }
 
   if (id != room.playerTime) {
-    console.log("não é sua vez", id, room.playerTime);
     return
   }
 

@@ -104,9 +104,8 @@ function updateGameStatus(gameStatus) {
       status.innerHTML = 'O jogo acabou!';
       break;
     default:
-      status.innerHTML = 'Vez do outro jogador jogar';
+      status.innerHTML = 'Vez do outro jogador';
       break;
-
 
   }
 
