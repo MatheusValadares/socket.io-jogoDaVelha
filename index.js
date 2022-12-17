@@ -1,4 +1,3 @@
-const { Socket } = require('dgram');
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -65,18 +64,6 @@ io.on('connection', (socket) => {
     socket.emit('updateGameStatus', rooms[indexRoom(idRoom)].gameStatus)
 
   })
-
-  socket.on('checkExistenceRoom', (URLroom) => {
-    let existenceRoom = false;
-    rooms.forEach(room => {
-      if (room.name == URLroom) {
-        existenceRoom = true;
-      }
-    });
-
-    socket.emit('returnExistenceRoom', existenceRoom);
-  })
-
 
   socket.on('enterRoom', (idRoom) => {
 
