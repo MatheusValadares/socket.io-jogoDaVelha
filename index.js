@@ -6,7 +6,21 @@ const socketIo = require('socket.io');
 
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.get('/room', express.urlencoded({ extended: false }), (req, res) => { res.sendFile(path.join(__dirname + '/public/room.html')) });
-app.get('/:room', express.urlencoded({ extended: false }), (req, res) => { res.sendFile(path.join(__dirname + '/public/room.html')) });
+app.get('/:room', express.urlencoded({ extended: false }), (req, res) => {
+
+  let room = req.params.room;
+
+  if (checkExistenceRoom(room) == true) {
+    if (checkPlayers(rooms[indexRoom(room)]) < 2) {
+      res.sendFile(path.join(__dirname + '/public/room.html'))
+    } else {
+      res.send("Essa sala já possui dois participantes!");
+    }
+  } else {
+    res.send("Essa sala não existe!");
+  }
+
+});
 
 const server = app.listen('3000', () => { console.log("running") });
 
@@ -140,6 +154,19 @@ function deleteRoom(room) {
 
 }
 
+function checkExistenceRoom(URLroom) {
+
+  let existenceRoom = false;
+  rooms.forEach(room => {
+    if (room.name == URLroom) {
+      existenceRoom = true;
+    }
+  });
+
+  return existenceRoom;
+
+}
+
 function playerRoom(playerID) {
 
   for (i = 0; i < rooms.length; i++) {
@@ -149,7 +176,6 @@ function playerRoom(playerID) {
   }
 
 }
-
 
 
 function checkPlayers(room) {
