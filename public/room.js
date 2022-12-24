@@ -112,7 +112,7 @@ function gameOverView(winnerPlayer) {
       sms.innerHTML = `Fim de jogo!<br>Ninguém venceu!`
       gameOver.style.display = 'flex';
 
-    }, 1000);
+    }, 500);
 
     return
   }
@@ -132,7 +132,7 @@ function gameOverView(winnerPlayer) {
     sms.innerHTML = `Fim de jogo!<br>O ${winner} venceu!`
     gameOver.style.display = 'flex';
 
-  }, 1000);
+  }, 500);
 
 }
 
