@@ -3,8 +3,6 @@ const rooms = require('../model/game').rooms;
 
 module.exports = (io, socket) => {
 
-  console.log("new connection")
-
   socket.on('createRoom', () => {
 
     let idRoom = socket.id;
